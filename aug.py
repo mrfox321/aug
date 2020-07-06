@@ -83,6 +83,25 @@ class Grid:
         """
         return grid + np.random.normal(0, scale, grid.shape)
 
+    @staticmethod
+    def to_boxes(grid: np.ndarray) -> List[Box]:
+
+        height, width, _ = grid.shape
+        boxes = [Box(grid[i, j, 0], grid[i, j, 1],
+                     grid[i+1, j+1, 0], grid[i+1, j+1, 1])
+                 for i in range(height - 1) for j in range(width - 1)]
+        return boxes
+
+    @staticmethod
+    def to_quads(grid: np.ndarray) -> List[Quad]:
+        height, width, _ = grid.shape
+        quads = [Quad(grid[i, j, 0], grid[i, j, 1],
+                      grid[i+1, j, 0], grid[i+1, j, 1],
+                      grid[i+1, j+1, 0], grid[i+1, j+1, 1],
+                      grid[i, j+1, 0], grid[i, j+1, 1])
+                 for i in range(height - 1) for j in range(width - 1)]
+        return quads
+
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
 
