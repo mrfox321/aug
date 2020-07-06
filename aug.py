@@ -1,5 +1,6 @@
 from PIL import Image
-from typing import Union
+from typing import Union, List, Tuple
+import numpy as np
 
 
 class Box:
@@ -17,6 +18,12 @@ class Box:
         self.y0 = y0
         self.x1 = x1
         self.y1 = y1
+
+    def as_tuple(self) -> Tuple[Union[float, int], Union[float, int], Union[float, int], Union[float, int]]:
+        return self.x0, self.y0, self.x1, self.y1
+
+    def as_list(self) -> Union[List[float], List[int]]:
+        return list(self.as_tuple())
 
 
 class Quad:
@@ -43,6 +50,12 @@ class Quad:
         self.x3 = x3
         self.y3 = y3
 
+    def as_tuple(self) -> Tuple:
+        return self.x0, self.y0, self.x1, self.y1, self.x2, self.y2, self.x3, self.y3
+
+    def as_list(self) -> List[Union[int, float]]:
+        return list(self.as_tuple())
+
 
 class Grid:
 
@@ -52,6 +65,18 @@ class Grid:
         self.width = width
         self.pixel_height = pixel_height
         self.pixel_width = pixel_width
+        self.grid = self.build_grid(height, width, pixel_height, pixel_width)
+
+    @staticmethod
+    def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
+
+        arr = np.empty((height, width, 2), dtype=np.float)
+        for i in range(height + 1):
+            for j in range(width + 1):
+                h = pixel_height / height * i
+                w = pixel_width / width * j
+                arr[i, j] = [h, w]
+        return arr
 
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
