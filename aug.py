@@ -46,7 +46,7 @@ class Quad:
 
 class Grid:
 
-    def __init__(self, height: int, width: int, pixel_height: int, pixel_width: int)
+    def __init__(self, height: int, width: int, pixel_height: int, pixel_width: int):
 
         self.height = height
         self.width = width
