@@ -76,6 +76,13 @@ class Grid:
         widths = pixel_width / width * np.arange(width + 1)
         return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
 
+    @staticmethod
+    def jitter(grid: np.ndarray, scale: float) -> np.ndarray:
+        """
+        Add gaussian noise to regular grid
+        """
+        return grid + np.random.normal(0, scale, grid.shape)
+
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
 
