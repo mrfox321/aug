@@ -69,14 +69,12 @@ class Grid:
 
     @staticmethod
     def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
-
-        arr = np.empty((height, width, 2), dtype=np.float)
-        for i in range(height + 1):
-            for j in range(width + 1):
-                h = pixel_height / height * i
-                w = pixel_width / width * j
-                arr[i, j] = [h, w]
-        return arr
+        """
+        arr[i, j] = [pixel_height / height * i, pixel_width / width * j]
+        """
+        heights = pixel_height / height * np.arange(height + 1)
+        widths = pixel_width / width * np.arange(width + 1)
+        return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
 
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
