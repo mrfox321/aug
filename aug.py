@@ -204,14 +204,16 @@ class MeshIter:
     def __iter__(self):
         return self
 
+    @property
+    def acceleration(self) -> np.ndarray:
+        return Physics.accelerate(self.mesh[-1])
+
     def init_step(self) -> np.ndarray:
-        acc = Physics.accelerate(self.mesh[0])
-        next_grid = self.mesh[0] + self.v_init * self.delta_t + 0.5 * acc * self.delta_t ** 2
+        next_grid = self.mesh[0] + self.v_init * self.delta_t + 0.5 * self.acceleration * self.delta_t ** 2
         return next_grid
 
     def step(self) -> np.ndarray:
-        acc = Physics.accelerate(self.mesh[-1])
-        next_grid = 2 * self.mesh[1] - self.mesh[0] + acc * self.delta_t ** 2
+        next_grid = 2 * self.mesh[1] - self.mesh[0] + self.acceleration * self.delta_t ** 2
         return next_grid
 
     def __next__(self):
