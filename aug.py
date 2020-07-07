@@ -1,5 +1,5 @@
 from PIL import Image
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 import numpy as np
 
 
@@ -70,13 +70,13 @@ class Quad:
 
 class Grid:
 
-    def __init__(self, height: int, width: int, pixel_height: int, pixel_width: int):
+    def __init__(self, height: int, width: int, pixel_height: int, pixel_width: int, grid: Optional[np.ndarray] = None):
 
         self.height = height
         self.width = width
         self.pixel_height = pixel_height
         self.pixel_width = pixel_width
-        self.grid = self.build_grid(height, width, pixel_height, pixel_width)
+        self.grid = grid or self.build_grid(height, width, pixel_height, pixel_width)
 
     @staticmethod
     def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
@@ -115,4 +115,15 @@ class Grid:
 
         pixel_width, pixel_height = image.size
         return cls(height, width, pixel_width, pixel_height)
+
+    @classmethod
+    def from_array(cls, grid: np.ndarray):
+        height, width, _ = grid.shape
+        pixel_height, pixel_width = grid[-1, 0, 0], grid[0, -1, 1]
+        return cls(height, width, pixel_height, pixel_width, grid)
+
+
+def augment(image: Image, height: int, width: int, scale: float) -> Image:
+
+    grid = Grid.from_image(image, height, width)
 
