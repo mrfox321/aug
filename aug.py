@@ -25,6 +25,10 @@ class Box:
     def as_list(self) -> Union[List[float], List[int]]:
         return list(self.as_tuple())
 
+    @classmethod
+    def from_corner(cls, grid: np.ndarray, i: int, j: int):
+        return cls(grid[i, j, 0], grid[i, j, 1], grid[i + 1, j + 1, 0], grid[i + 1, j + 1, 1])
+
 
 class Quad:
     """
@@ -55,6 +59,13 @@ class Quad:
 
     def as_list(self) -> List[Union[int, float]]:
         return list(self.as_tuple())
+
+    @classmethod
+    def from_corner(cls, grid: np.ndarray, i: int, j: int):
+        return cls(grid[i, j, 0], grid[i, j, 1],
+                   grid[i + 1, j, 0], grid[i + 1, j, 1],
+                   grid[i + 1, j + 1, 0], grid[i + 1, j + 1, 1],
+                   grid[i, j + 1, 0], grid[i, j + 1, 1])
 
 
 class Grid:
@@ -90,19 +101,13 @@ class Grid:
     def to_boxes(grid: np.ndarray) -> List[Box]:
 
         height, width, _ = grid.shape
-        boxes = [Box(grid[i, j, 0], grid[i, j, 1],
-                     grid[i+1, j+1, 0], grid[i+1, j+1, 1])
-                 for i in range(height - 1) for j in range(width - 1)]
+        boxes = [Box.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
         return boxes
 
     @staticmethod
     def to_quads(grid: np.ndarray) -> List[Quad]:
         height, width, _ = grid.shape
-        quads = [Quad(grid[i, j, 0], grid[i, j, 1],
-                      grid[i+1, j, 0], grid[i+1, j, 1],
-                      grid[i+1, j+1, 0], grid[i+1, j+1, 1],
-                      grid[i, j+1, 0], grid[i, j+1, 1])
-                 for i in range(height - 1) for j in range(width - 1)]
+        quads = [Quad.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
         return quads
 
     @classmethod
