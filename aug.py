@@ -83,11 +83,8 @@ class Grid:
         """
         rng = np.random.normal(0, scale, grid.shape)
         if is_pinned:
-            noise = np.zeros_like(grid)
-            noise[1:-1, 1:-1] = rng[1:-1, 1:-1]
-        else:
-            noise = rng
-        return grid + noise
+            rng[0] = rng[-1] = rng[:, 0] = rng[:, -1] = 0.
+        return grid + rng
 
     @staticmethod
     def to_boxes(grid: np.ndarray) -> List[Box]:
