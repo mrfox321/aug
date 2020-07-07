@@ -108,11 +108,11 @@ class Grid:
 
     @property
     def height(self):
-        return self.grid.shape[0]
+        return self.grid.shape[0] - 1
 
     @property
     def width(self):
-        return self.grid.shape[1]
+        return self.grid.shape[1] - 1
 
     @property
     def pixel_height(self):
@@ -134,3 +134,20 @@ def augment(image: Image, height: int, width: int, scale: float) -> Image:
 
     grid = Grid.from_image(image, height, width)
 
+
+############  TESTS   ################
+
+def test_grid():
+
+    path = 'test.png'
+    image = Image.open(path)
+    height = width = 10
+    pixel_width, pixel_height = image.size
+
+    grid = Grid(build_grid(height, width, pixel_height, pixel_width))
+
+    assert grid.height == height
+    assert grid.width == width
+
+    assert grid.pixel_width == pixel_width
+    assert grid.pixel_height == pixel_height
