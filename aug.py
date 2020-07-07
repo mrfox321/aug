@@ -71,10 +71,13 @@ class Quad:
 def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
     """
     arr[i, j] = [pixel_height / height * i, pixel_width / width * j]
+
+    NOTE:
+    Integer array *required* for PIL API (`box` tuple/list)
     """
     heights = pixel_height / height * np.arange(height + 1)
     widths = pixel_width / width * np.arange(width + 1)
-    return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
+    return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1).astype(np.int)
 
 
 def jitter(grid: np.ndarray, scale_x: float, scale_y: Optional[float] = None, is_pinned=True) -> np.ndarray:
