@@ -155,9 +155,9 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
     :return:
     """
     grid = Grid.from_image(image, height, width)
-    scale_x, scale_y = scale * grid.block_width, scale * grid.block_height
+    scale_width, scale_height = scale * grid.block_width, scale * grid.block_height
 
-    random_grid = jitter(grid.grid, scale_x, scale_y)
+    random_grid = jitter(grid.grid, scale_width, scale_height)
 
     boxes = to_boxes(grid.grid)
     quads = to_quads(random_grid)
