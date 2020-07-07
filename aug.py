@@ -1,5 +1,5 @@
 from PIL import Image
-from typing import Union, List, Tuple, Optional, Sequence
+from typing import Union, List, Tuple, Optional, Sequence, Iterable
 import numpy as np
 from scipy.signal import convolve2d
 from collections import deque
@@ -244,6 +244,14 @@ class MeshIter:
         grid_base, random_grid = image2grid(image, height, width, scale)
         return cls(grid_base, random_grid, delta_t, v_init)
 
+
+def frames(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable[Image]:
+
+    boxes = to_boxes(meshiter.grid_base)
+    for grid in meshiter:
+        quads = to_quads(grid)
+        mesh = build_mesh(boxes, quads)
+        yield image.transform(image.size, Image.MESH, mesh, resample)
 
 
 ############  TESTS   ################
