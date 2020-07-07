@@ -169,6 +169,16 @@ def build_mesh(boxes: List[Box], quads: List[Quad]) -> List[List[Sequence[float]
     return mesh
 
 
+def image2grid(image: Image, height: int, width: int, scale: float) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    From an image generate the underlying regular grid and some random initialization
+    """
+    grid = Grid.from_image(image, height, width)
+    scale_width, scale_height = scale * grid.block_width, scale * grid.block_height
+    random_grid = jitter(grid.grid, scale_width, scale_height)
+    return grid.grid, random_grid
+
+
 def jitter_image(image: Image, height: int, width: int, scale: float, resample=Image.NEAREST) -> Image:
     """
 
@@ -179,12 +189,9 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
     :param resample: resample method for PIL.Image
     :return:
     """
-    grid = Grid.from_image(image, height, width)
-    scale_width, scale_height = scale * grid.block_width, scale * grid.block_height
+    grid, random_grid = image2grid(image, height, width, scale)
 
-    random_grid = jitter(grid.grid, scale_width, scale_height)
-
-    boxes = to_boxes(grid.grid)
+    boxes = to_boxes(grid)
     quads = to_quads(random_grid)
     mesh = build_mesh(boxes, quads)
 
@@ -230,6 +237,13 @@ class MeshIter:
             self.mesh.append(next_grid)
             self.mesh.popleft()
         return self.mesh[-1] + self.grid_base
+
+    @classmethod
+    def from_image(cls, image: Image, height: int, width: int, scale: float,
+                   delta_t: float, v_init: Optional[np.ndarray] = None):
+        grid_base, random_grid = image2grid(image, height, width, scale)
+        return cls(grid_base, random_grid, delta_t, v_init)
+
 
 
 ############  TESTS   ################
