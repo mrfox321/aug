@@ -1,5 +1,5 @@
 from PIL import Image
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 import numpy as np
 
 
@@ -77,11 +77,15 @@ def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> 
     return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
 
 
-def jitter(grid: np.ndarray, scale: float, is_pinned=True) -> np.ndarray:
+def jitter(grid: np.ndarray, scale_x: float, scale_y: Optional[float] = None, is_pinned=True) -> np.ndarray:
     """
     Add gaussian noise to regular grid.  Boolean flag pins the boundary of the grid
     """
-    rng = np.random.normal(0, scale, grid.shape)
+    if scale_y:
+        rng = [np.random.normal(0, scale_x, grid.shape[:-1]), np.random.normal(0, scale_y, grid.shape[:-1])]
+        rng = np.stack(rng, axis=-1)
+    else:
+        rng = np.random.normal(0, scale_x, grid.shape)
     if is_pinned:
         rng[0] = rng[-1] = rng[:, 0] = rng[:, -1] = 0.
     return grid + rng
@@ -136,6 +140,14 @@ class Grid:
 
 
 def jitter_image(image: Image, height: int, width: int, scale: float) -> Image:
+    """
+
+    :param image: PIL Image Object
+    :param height: number of coarse grained pixels in y-direction
+    :param width: number of coarse grained pixels in x-direction
+    :param scale: std-dev of fluctuations (scale := pixel scale / block size)
+    :return:
+    """
     grid = Grid.from_image(image, height, width)
 
 
