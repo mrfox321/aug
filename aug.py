@@ -194,11 +194,11 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
 
 class MeshIter:
 
-    def __init__(self, grid: Grid, v_init: np.ndarray, delta_t: float):
+    def __init__(self, grid: Grid, delta_t: float, v_init: Optional[np.ndarray]):
 
         self.grid = grid
         self.mesh: deque[np.ndarray] = deque([])
-        self.v_init = v_init
+        self.v_init = v_init or np.zeros_like(grid.grid)
         self.delta_t = delta_t
 
     def __iter__(self):
