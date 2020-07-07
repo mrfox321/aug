@@ -68,59 +68,66 @@ class Quad:
                    grid[i, j + 1, 0], grid[i, j + 1, 1])
 
 
+def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
+    """
+    arr[i, j] = [pixel_height / height * i, pixel_width / width * j]
+    """
+    heights = pixel_height / height * np.arange(height + 1)
+    widths = pixel_width / width * np.arange(width + 1)
+    return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
+
+
+def jitter(grid: np.ndarray, scale: float, is_pinned=True) -> np.ndarray:
+    """
+    Add gaussian noise to regular grid.  Boolean flag pins the boundary of the grid
+    """
+    rng = np.random.normal(0, scale, grid.shape)
+    if is_pinned:
+        rng[0] = rng[-1] = rng[:, 0] = rng[:, -1] = 0.
+    return grid + rng
+
+
+def to_boxes(grid: np.ndarray) -> List[Box]:
+
+    height, width, _ = grid.shape
+    boxes = [Box.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
+    return boxes
+
+
+def to_quads(grid: np.ndarray) -> List[Quad]:
+    height, width, _ = grid.shape
+    quads = [Quad.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
+    return quads
+
+
 class Grid:
 
-    def __init__(self, height: int, width: int, pixel_height: int, pixel_width: int, grid: Optional[np.ndarray] = None):
+    def __init__(self, grid: np.ndarray):
 
-        self.height = height
-        self.width = width
-        self.pixel_height = pixel_height
-        self.pixel_width = pixel_width
-        self.grid = grid or self.build_grid(height, width, pixel_height, pixel_width)
+        self.grid = grid
 
-    @staticmethod
-    def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
-        """
-        arr[i, j] = [pixel_height / height * i, pixel_width / width * j]
-        """
-        heights = pixel_height / height * np.arange(height + 1)
-        widths = pixel_width / width * np.arange(width + 1)
-        return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
+    @property
+    def height(self):
+        return self.grid.shape[0]
 
-    @staticmethod
-    def jitter(grid: np.ndarray, scale: float, is_pinned=True) -> np.ndarray:
-        """
-        Add gaussian noise to regular grid.  Boolean flag pins the boundary of the grid
-        """
-        rng = np.random.normal(0, scale, grid.shape)
-        if is_pinned:
-            rng[0] = rng[-1] = rng[:, 0] = rng[:, -1] = 0.
-        return grid + rng
+    @property
+    def width(self):
+        return self.grid.shape[1]
 
-    @staticmethod
-    def to_boxes(grid: np.ndarray) -> List[Box]:
+    @property
+    def pixel_height(self):
+        return self.grid[-1, 0, 0]
 
-        height, width, _ = grid.shape
-        boxes = [Box.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
-        return boxes
-
-    @staticmethod
-    def to_quads(grid: np.ndarray) -> List[Quad]:
-        height, width, _ = grid.shape
-        quads = [Quad.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
-        return quads
+    @property
+    def pixel_width(self):
+        return self.grid[0, -1, 1]
 
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
 
         pixel_width, pixel_height = image.size
-        return cls(height, width, pixel_width, pixel_height)
-
-    @classmethod
-    def from_array(cls, grid: np.ndarray):
-        height, width, _ = grid.shape
-        pixel_height, pixel_width = grid[-1, 0, 0], grid[0, -1, 1]
-        return cls(height, width, pixel_height, pixel_width, grid)
+        grid = build_grid(height, width, pixel_height, pixel_width)
+        return cls(grid)
 
 
 def augment(image: Image, height: int, width: int, scale: float) -> Image:
