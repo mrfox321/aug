@@ -120,6 +120,14 @@ class Grid:
     def pixel_width(self):
         return self.grid[0, -1, 1]
 
+    @property
+    def block_height(self):
+        return self.grid[1, 0, 0] - self.grid[0, 0, 0]
+
+    @property
+    def block_width(self):
+        return self.grid[0, 1, 1] - self.grid[0, 0, 1]
+
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
         pixel_width, pixel_height = image.size
@@ -127,7 +135,7 @@ class Grid:
         return cls(grid)
 
 
-def augment(image: Image, height: int, width: int, scale: float) -> Image:
+def jitter_image(image: Image, height: int, width: int, scale: float) -> Image:
     grid = Grid.from_image(image, height, width)
 
 
@@ -146,3 +154,6 @@ def test_grid():
 
     assert grid.pixel_width == pixel_width
     assert grid.pixel_height == pixel_height
+
+    assert grid.block_height == pixel_height / height
+    assert grid.block_width == pixel_width / width
