@@ -77,11 +77,17 @@ class Grid:
         return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1)
 
     @staticmethod
-    def jitter(grid: np.ndarray, scale: float) -> np.ndarray:
+    def jitter(grid: np.ndarray, scale: float, is_pinned=True) -> np.ndarray:
         """
-        Add gaussian noise to regular grid
+        Add gaussian noise to regular grid.  Boolean flag pins the boundary of the grid
         """
-        return grid + np.random.normal(0, scale, grid.shape)
+        rng = np.random.normal(0, scale, grid.shape)
+        if is_pinned:
+            noise = np.zeros_like(grid)
+            noise[1:-1, 1:-1] = rng[1:-1, 1:-1]
+        else:
+            noise = rng
+        return grid + noise
 
     @staticmethod
     def to_boxes(grid: np.ndarray) -> List[Box]:
