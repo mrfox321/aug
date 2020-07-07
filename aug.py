@@ -1,6 +1,7 @@
 from PIL import Image
 from typing import Union, List, Tuple, Optional, Sequence
 import numpy as np
+from scipy.signal import convolve2d
 
 
 class Box:
@@ -66,6 +67,21 @@ class Quad:
                    grid[i + 1, j, 0], grid[i + 1, j, 1],
                    grid[i + 1, j + 1, 0], grid[i + 1, j + 1, 1],
                    grid[i, j + 1, 0], grid[i, j + 1, 1])
+
+
+class Physics:
+
+    @staticmethod
+    def accelerate(grid: np.ndarray, is_pinned: bool = True) -> np.ndarray:
+
+        coupling_x, coupling_y = np.array([[1, -2, 1]]), np.array([[1, -2, 1]]).T
+
+        acc = np.zeros_like(grid)
+        acc[..., 0] = convolve2d(grid[..., 0], coupling_x, mode='same')
+        acc[..., 1] = convolve2d(grid[..., 1], coupling_y, mode='same')
+        if is_pinned:
+            acc[0] = acc[-1] = acc[:, 0] = acc[:, -1] = 0.
+        return acc
 
 
 def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
