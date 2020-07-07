@@ -189,10 +189,12 @@ def test_grid():
     height = width = 10
     pixel_width, pixel_height = image.size
 
-    grid = Grid(build_grid(height, width, pixel_height, pixel_width))
+    grid_arr = build_grid(height, width, pixel_height, pixel_width)
+    grid_impl_arr = build_grid_impl(height, width, pixel_height, pixel_width)
 
-    assert np.allclose(build_grid(height, width, pixel_height, pixel_width),
-                       build_grid_impl(height, width, pixel_height, pixel_width))
+    assert np.allclose(grid_arr, grid_impl_arr)
+
+    grid = Grid(grid_arr)
 
     assert grid.height == height
     assert grid.width == width
