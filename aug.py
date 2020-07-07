@@ -191,7 +191,8 @@ def test_grid():
 
     grid = Grid(build_grid(height, width, pixel_height, pixel_width))
 
-    assert np.allclose(grid.grid, build_grid_impl(height, width, pixel_height, pixel_width))
+    assert np.allclose(build_grid(height, width, pixel_height, pixel_width),
+                       build_grid_impl(height, width, pixel_height, pixel_width))
 
     assert grid.height == height
     assert grid.width == width
