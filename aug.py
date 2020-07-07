@@ -77,7 +77,7 @@ def build_grid(height: int, width: int, pixel_height: int, pixel_width: int) -> 
     """
     heights = pixel_height / height * np.arange(height + 1)
     widths = pixel_width / width * np.arange(width + 1)
-    return np.stack(np.meshgrid(heights, widths, indexing='ij'), axis=-1).astype(np.int)
+    return np.stack(np.meshgrid(widths, heights, indexing='xy'), axis=-1).astype(np.int)
 
 
 def jitter(grid: np.ndarray, scale_x: float, scale_y: Optional[float] = None, is_pinned=True) -> np.ndarray:
@@ -121,19 +121,19 @@ class Grid:
 
     @property
     def pixel_height(self):
-        return self.grid[-1, 0, 0]
+        return self.grid[-1, 0, 1]
 
     @property
     def pixel_width(self):
-        return self.grid[0, -1, 1]
+        return self.grid[0, -1, 0]
 
     @property
     def block_height(self):
-        return self.grid[1, 0, 0] - self.grid[0, 0, 0]
+        return self.grid[1, 0, 1] - self.grid[0, 0, 1]
 
     @property
     def block_width(self):
-        return self.grid[0, 1, 1] - self.grid[0, 0, 1]
+        return self.grid[0, 1, 0] - self.grid[0, 0, 0]
 
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
@@ -172,6 +172,17 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
 
 ############  TESTS   ################
 
+
+def build_grid_impl(height: int, width: int, pixel_height: int, pixel_width: int) -> np.ndarray:
+    heights = pixel_height / height * np.arange(height + 1)
+    widths = pixel_width / width * np.arange(width + 1)
+    grid = np.zeros((height+1, width+1, 2))
+    for i, h in enumerate(heights):
+        for j, w in enumerate(widths):
+            grid[i, j] = [w, h]
+    return grid.astype(np.int)
+
+
 def test_grid():
     path = 'test.png'
     image = Image.open(path)
@@ -179,6 +190,8 @@ def test_grid():
     pixel_width, pixel_height = image.size
 
     grid = Grid(build_grid(height, width, pixel_height, pixel_width))
+
+    assert np.allclose(grid.grid, build_grid_impl(height, width, pixel_height, pixel_width))
 
     assert grid.height == height
     assert grid.width == width
