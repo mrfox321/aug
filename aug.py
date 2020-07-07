@@ -194,12 +194,14 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
 
 class MeshIter:
 
-    def __init__(self, grid: Grid, delta_t: float, v_init: Optional[np.ndarray] = None):
+    def __init__(self, grid_base: np.ndarray, grid_init: np.ndarray,
+                 delta_t: float, v_init: Optional[np.ndarray] = None):
 
-        self.grid = grid
-        self.mesh: deque[np.ndarray] = deque([])
-        self.v_init = v_init or np.zeros_like(grid.grid)
-        self.delta_t = delta_t
+        self.grid_base = grid_base                         # array of equilibrium positions
+        self.grid_init = grid_init                         # array of initial positions
+        self.mesh: deque[np.ndarray] = deque([])           # array of displacements from equilibrium
+        self.v_init = v_init or np.zeros_like(grid_base)   # array of initial velocities
+        self.delta_t = delta_t                             # time step for verlet integration
 
     def __iter__(self):
         return self
@@ -216,10 +218,10 @@ class MeshIter:
         next_grid = 2 * self.mesh[1] - self.mesh[0] + self.acceleration * self.delta_t ** 2
         return next_grid
 
-    def __next__(self):
+    def __next__(self) -> np.ndarray:
 
         if len(self.mesh) == 0:
-            self.mesh.append(self.grid.grid)
+            self.mesh.append(self.grid_init - self.grid_base)
         elif len(self.mesh) == 1:
             next_grid = self.init_step()
             self.mesh.append(next_grid)
@@ -227,7 +229,7 @@ class MeshIter:
             next_grid = self.step()
             self.mesh.append(next_grid)
             self.mesh.popleft()
-        return self.mesh[-1]
+        return self.mesh[-1] + self.grid_base
 
 
 ############  TESTS   ################
