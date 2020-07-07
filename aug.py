@@ -1,5 +1,5 @@
 from PIL import Image
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional, Sequence
 import numpy as np
 
 
@@ -139,16 +139,32 @@ class Grid:
         return cls(grid)
 
 
-def jitter_image(image: Image, height: int, width: int, scale: float) -> Image:
+def build_mesh(boxes: List[Box], quads: List[Quad]) -> List[List[Sequence[float]]]:
+    mesh = [[box.as_tuple(), quad.as_list()] for box, quad in zip(boxes, quads)]
+    return mesh
+
+
+def jitter_image(image: Image, height: int, width: int, scale: float, resample=Image.NEAREST) -> Image:
     """
 
     :param image: PIL Image Object
     :param height: number of coarse grained pixels in y-direction
     :param width: number of coarse grained pixels in x-direction
     :param scale: std-dev of fluctuations (scale := pixel scale / block size)
+    :param resample: resample method for PIL.Image
     :return:
     """
     grid = Grid.from_image(image, height, width)
+    scale_x, scale_y = scale * grid.block_width, scale * grid.block_height
+
+    random_grid = jitter(grid.grid, scale_x, scale_y)
+
+    boxes = to_boxes(grid.grid)
+    quads = to_quads(random_grid)
+    mesh = build_mesh(boxes, quads)
+
+    random_image = image.transform(image.size, Image.MESH, mesh, resample)
+    return random_image
 
 
 ############  TESTS   ################
