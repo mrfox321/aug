@@ -69,6 +69,11 @@ class Quad:
                    grid[i, j + 1, 0], grid[i, j + 1, 1])
 
 
+def zero_edges(arr: np.ndarray) -> np.ndarray:
+    arr[0] = arr[-1] = arr[:, 0] = arr[:, -1] = 0.
+    return arr
+
+
 class Physics:
 
     @staticmethod
@@ -80,7 +85,7 @@ class Physics:
         acc[..., 0] = convolve2d(grid[..., 0], coupling_x, mode='same')
         acc[..., 1] = convolve2d(grid[..., 1], coupling_y, mode='same')
         if is_pinned:
-            acc[0] = acc[-1] = acc[:, 0] = acc[:, -1] = 0.
+            acc = zero_edges(acc)
         return acc
 
 
@@ -106,7 +111,7 @@ def jitter(grid: np.ndarray, scale_x: float, scale_y: Optional[float] = None, is
     else:
         rng = np.random.normal(0, scale_x, grid.shape)
     if is_pinned:
-        rng[0] = rng[-1] = rng[:, 0] = rng[:, -1] = 0.
+        rng = zero_edges(rng)
     return grid + rng
 
 
