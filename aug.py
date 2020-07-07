@@ -1,5 +1,5 @@
 from PIL import Image
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple
 import numpy as np
 
 
@@ -12,8 +12,8 @@ class Box:
         .            .
         O  ---- (x_1, y_1)
     """
-    def __init__(self, x0: Union[int, float], y0: Union[int, float], x1: Union[int, float], y1: Union[int, float]):
 
+    def __init__(self, x0: Union[int, float], y0: Union[int, float], x1: Union[int, float], y1: Union[int, float]):
         self.x0 = x0
         self.y0 = y0
         self.x1 = x1
@@ -39,12 +39,12 @@ class Quad:
          .                    .
     (x_1, y_1) ---------- (x_2, y_2)
     """
+
     def __init__(self,
                  x0: Union[int, float], y0: Union[int, float],
                  x1: Union[int, float], y1: Union[int, float],
                  x2: Union[int, float], y2: Union[int, float],
                  x3: Union[int, float], y3: Union[int, float]):
-
         self.x0 = x0
         self.y0 = y0
         self.x1 = x1
@@ -88,7 +88,6 @@ def jitter(grid: np.ndarray, scale: float, is_pinned=True) -> np.ndarray:
 
 
 def to_boxes(grid: np.ndarray) -> List[Box]:
-
     height, width, _ = grid.shape
     boxes = [Box.from_corner(grid, i, j) for i in range(height - 1) for j in range(width - 1)]
     return boxes
@@ -103,7 +102,6 @@ def to_quads(grid: np.ndarray) -> List[Quad]:
 class Grid:
 
     def __init__(self, grid: np.ndarray):
-
         self.grid = grid
 
     @property
@@ -124,21 +122,18 @@ class Grid:
 
     @classmethod
     def from_image(cls, image: Image, height: int, width: int):
-
         pixel_width, pixel_height = image.size
         grid = build_grid(height, width, pixel_height, pixel_width)
         return cls(grid)
 
 
 def augment(image: Image, height: int, width: int, scale: float) -> Image:
-
     grid = Grid.from_image(image, height, width)
 
 
 ############  TESTS   ################
 
 def test_grid():
-
     path = 'test.png'
     image = Image.open(path)
     height = width = 10
