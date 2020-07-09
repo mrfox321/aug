@@ -305,11 +305,8 @@ class Frames:
         return self.image.size[1]
 
     def write(self, n_frames: int):
-        n = 0
-        while n < n_frames:
-            frame = next(self.cv2_frames)
-            self.video.write(frame)
-            n += 1
+        for _ in range(n_frames):
+            self.video.write(next(self.cv2_frames))
         cv2.destroyAllWindows()
         self.video.release()
 
