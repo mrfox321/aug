@@ -293,8 +293,8 @@ class Frames:
         self.cv2_frames = map(image_to_cv2_array, frames)
         self.image = image
         self.fps = fps
-        self.path = path
-        self.video = cv2.VideoWriter(path, 0, fps, image.size)
+        self.name = path + '.mp4'
+        self.video = cv2.VideoWriter(self.name, cv2.VideoWriter_fourcc(*'MP4V'), fps, image.size)
 
     @property
     def width(self):
