@@ -314,12 +314,25 @@ class Frames:
         self.video.release()
 
     @classmethod
-    def from_random_image(cls, image_path: str, fps: float, video_path: str, height: int = 10, width: int = 20,
+    def from_random_image(cls, image_path: str, video_path: str, fps: float, height: int = 10, width: int = 20,
                           scale: float = 0.1, delta_t: float = 0.5, v_init: Optional[np.ndarray] = None):
         image = Image.open(image_path)
         meshiter = MeshIter.from_image(image, height, width, scale, delta_t, v_init)
         frames = frame_iter(meshiter, image)
         return cls(frames, image, fps, video_path)
+
+
+def write_random_video(
+        src: str,
+        dest: str,
+        n_frames: int,
+        fps: float,
+        height: int,
+        width: int,
+        scale: float,
+        delta_t: float
+):
+    Frames.from_random_image(src, dest, fps, height, width, scale, delta_t).write(n_frames)
 
 
 ############  TESTS   ################
