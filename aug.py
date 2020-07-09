@@ -1,5 +1,6 @@
+import cv2
 from PIL import Image
-from typing import Union, List, Tuple, Optional, Sequence, Iterable
+from typing import Union, List, Tuple, Optional, Sequence, Iterator
 import numpy as np
 from scipy.signal import convolve2d
 from collections import deque
@@ -158,7 +159,7 @@ class Grid:
         return self.grid[0, 1, 0] - self.grid[0, 0, 0]
 
     @classmethod
-    def from_image(cls, image: Image, height: int, width: int):
+    def from_image(cls, image: Image.Image, height: int, width: int):
         pixel_width, pixel_height = image.size
         grid = build_grid(height, width, pixel_height, pixel_width)
         return cls(grid)
@@ -169,7 +170,7 @@ def build_mesh(boxes: List[Box], quads: List[Quad]) -> List[List[Sequence[float]
     return mesh
 
 
-def image2grid(image: Image, height: int, width: int, scale: float) -> Tuple[np.ndarray, np.ndarray]:
+def image2grid(image: Image.Image, height: int, width: int, scale: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     From an image generate the underlying regular grid and some random initialization
     """
@@ -179,7 +180,7 @@ def image2grid(image: Image, height: int, width: int, scale: float) -> Tuple[np.
     return grid.grid, random_grid
 
 
-def jitter_image(image: Image, height: int, width: int, scale: float, resample=Image.NEAREST) -> Image:
+def jitter_image(image: Image.Image, height: int, width: int, scale: float, resample=Image.NEAREST) -> Image.Image:
     """
 
     :param image: PIL Image Object
@@ -255,7 +256,7 @@ class MeshIter:
         return cls(grid_base, random_grid, delta_t, v_init)
 
 
-def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable['Image']:
+def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterator[Image.Image]:
 
     boxes = to_boxes(meshiter.grid_base)
     for grid in meshiter:
@@ -275,6 +276,50 @@ class ImageAugment:
 
     def augment(self, arr: np.ndarray):
         return jitter_image_array(arr, self.height, self.width, self.scale, self.resample)
+
+
+def image_to_cv2_array(image: Image) -> np.ndarray:
+
+    open_cv_image_RGB_array = np.array(image)
+    # RGB -> BGR
+    open_cv_image_BGR_array = open_cv_image_RGB_array[:, :, ::-1]
+    return open_cv_image_BGR_array
+
+
+class Frames:
+
+    def __init__(self, frames: Iterator[Image.Image], image: Image.Image, fps: float, path: str):
+
+        self.cv2_frames = map(image_to_cv2_array, frames)
+        self.image = image
+        self.fps = fps
+        self.path = path
+        self.video = cv2.VideoWriter(path, 0, fps, image.size)
+
+    @property
+    def width(self):
+        return self.image.size[0]
+
+    @property
+    def height(self):
+        return self.image.size[1]
+
+    def write(self, n_frames: int):
+        n = 0
+        while n < n_frames:
+            frame = next(self.cv2_frames)
+            self.video.write(frame)
+            n += 1
+        cv2.destroyAllWindows()
+        self.video.release()
+
+    @classmethod
+    def from_random_image(cls, image_path: str, fps: float, video_path: str, height: int = 10, width: int = 20,
+                          scale: float = 0.1, delta_t: float = 0.5, v_init: Optional[np.ndarray] = None):
+        image = Image.open(image_path)
+        meshiter = MeshIter.from_image(image, height, width, scale, delta_t, v_init)
+        frames = frame_iter(meshiter, image)
+        return cls(frames, image, fps, video_path)
 
 
 ############  TESTS   ################
