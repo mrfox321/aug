@@ -245,7 +245,7 @@ class MeshIter:
         return cls(grid_base, random_grid, delta_t, v_init)
 
 
-def frames(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable[Image]:
+def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable[Image]:
 
     boxes = to_boxes(meshiter.grid_base)
     for grid in meshiter:
