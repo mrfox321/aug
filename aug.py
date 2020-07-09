@@ -255,7 +255,7 @@ class MeshIter:
         return cls(grid_base, random_grid, delta_t, v_init)
 
 
-def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable[Image]:
+def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iterable['Image']:
 
     boxes = to_boxes(meshiter.grid_base)
     for grid in meshiter:
@@ -266,14 +266,15 @@ def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iter
 
 class ImageAugment:
 
-    def __init__(self, height: int, width: int, scale: float, resample: Image.NEAREST):
+    def __init__(self, height: int, width: int, scale: float, resample=Image.NEAREST):
 
         self.height = height
         self.width = width
         self.scale = scale
         self.resample = resample
 
-
+    def augment(self, arr: np.ndarray):
+        return jitter_image_array(arr, self.height, self.width, self.scale, self.resample)
 
 
 ############  TESTS   ################
