@@ -199,6 +199,16 @@ def jitter_image(image: Image, height: int, width: int, scale: float, resample=I
     return random_image
 
 
+def jitter_image_array(arr: np.ndarray, height: int, width: int, scale: float, resample=Image.NEAREST) -> np.ndarray:
+    """
+    numpy bitmap -> numpy bitmap transformation of `jitter_image`
+    """
+    image = Image.fromarray(arr)
+    rng_image = jitter_image(image, height, width, scale, resample)
+    rng_arr = np.array(rng_image)
+    return rng_arr
+
+
 class MeshIter:
 
     def __init__(self, grid_base: np.ndarray, grid_init: np.ndarray,
@@ -252,6 +262,18 @@ def frame_iter(meshiter: MeshIter, image: Image, resample=Image.NEAREST) -> Iter
         quads = to_quads(grid)
         mesh = build_mesh(boxes, quads)
         yield image.transform(image.size, Image.MESH, mesh, resample)
+
+
+class ImageAugment:
+
+    def __init__(self, height: int, width: int, scale: float, resample: Image.NEAREST):
+
+        self.height = height
+        self.width = width
+        self.scale = scale
+        self.resample = resample
+
+
 
 
 ############  TESTS   ################
